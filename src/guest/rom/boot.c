@@ -36,6 +36,23 @@ static int boot_validate(struct boot *boot) {
   char result[33];
   MD5_Final(result, &md5_ctx);
 
+  /* re-encode digest bytes as hex string in-place */
+  {
+    unsigned int a = (unsigned char)result[0]  | ((unsigned char)result[1]  << 8) |
+                     ((unsigned char)result[2]  << 16) | ((unsigned char)result[3]  << 24);
+    unsigned int b = (unsigned char)result[4]  | ((unsigned char)result[5]  << 8) |
+                     ((unsigned char)result[6]  << 16) | ((unsigned char)result[7]  << 24);
+    unsigned int c = (unsigned char)result[8]  | ((unsigned char)result[9]  << 8) |
+                     ((unsigned char)result[10] << 16) | ((unsigned char)result[11] << 24);
+    unsigned int d = (unsigned char)result[12] | ((unsigned char)result[13] << 8) |
+                     ((unsigned char)result[14] << 16) | ((unsigned char)result[15] << 24);
+    snprintf(result, 33, "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+      a&0xff,(a>>8)&0xff,(a>>16)&0xff,(a>>24)&0xff,
+      b&0xff,(b>>8)&0xff,(b>>16)&0xff,(b>>24)&0xff,
+      c&0xff,(c>>8)&0xff,(c>>16)&0xff,(c>>24)&0xff,
+      d&0xff,(d>>8)&0xff,(d>>16)&0xff,(d>>24)&0xff);
+  }
+
   for (int i = 0; i < array_size(valid_bios_md5); ++i) {
     if (strcmp(result, valid_bios_md5[i]) == 0) {
       return 1;
