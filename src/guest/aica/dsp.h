@@ -1,3 +1,4 @@
+#include <stdbool.h>
 struct dsp {
   struct jit_backend *backend;
   void (*step)(struct aica *);
