@@ -1,7 +1,7 @@
 # Software Information
 display_name = "Sega Dreamcast (redream)"
 authors = "inolen"
-supported_extensions = "gdi|cdi"
+supported_extensions = "gdi|cdi|chd"
 corename = "redream"
 license = "GPLv2"
 permissions = ""
