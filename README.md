@@ -9,10 +9,15 @@ redream is licensed under the [GPLv3 license](https://github.com/inolen/redream/
 To build the latest binaries, checkout out the [building](http://redream.io/docs/building) docs.
 
 cd /your_path/redream-next/
+
 mkdir build
+
 cd build
+
 rm -rf *
+
 cmake -DBUILD_LIBRETRO=ON ..
+
 make -j$(nproc)
 
 ## Downloading
