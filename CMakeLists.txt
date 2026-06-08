@@ -98,6 +98,12 @@ list(APPEND RELIB_LIBS glad)
 # inih
 add_library(inih STATIC deps/inih/ini.c)
 list(APPEND RELIB_INCLUDES deps/inih)
+
+# libchdr — CHD disc image support
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+add_subdirectory(deps/libchdr EXCLUDE_FROM_ALL)
+list(APPEND RELIB_INCLUDES deps/libchdr/include)
+list(APPEND RELIB_LIBS chdr-static)
 list(APPEND RELIB_LIBS inih)
 
 # vixl
@@ -194,6 +200,7 @@ set(RELIB_SOURCES
   src/guest/bios/flash.c
   src/guest/bios/syscalls.c
   src/guest/gdrom/cdi.c
+  src/guest/gdrom/chd.c
   src/guest/gdrom/disc.c
   src/guest/gdrom/gdi.c
   src/guest/gdrom/gdrom.c
