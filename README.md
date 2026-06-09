@@ -16,7 +16,7 @@ cd build
 
 rm -rf *
 
-cmake -DBUILD_LIBRETRO=ON ..
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBRETRO=ON ..
 
 make -j$(nproc)
 
