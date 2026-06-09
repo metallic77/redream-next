@@ -16,6 +16,11 @@ struct sh4_guest;
 
 #define SH4_CLOCK_FREQ INT64_C(200000000)
 
+/* runtime speed multiplier set by the frontend (100 = normal, 200 = 2x) */
+extern int sh4_speed_percent;
+/* cable type: 0=VGA, 2=RGB, 3=Composite */
+extern int sh4_cable_type;
+
 enum {
   SH4_DMA_FROM_ADDR,
   SH4_DMA_TO_ADDR,

@@ -13,6 +13,9 @@
 
 #include "emulator.h"
 #include "core/option.h"
+
+/* set by the frontend (0 = disabled, N = skip up to N frames when behind) */
+int emu_frameskip_max = 0;
 #include "core/profiler.h"
 #include "core/thread.h"
 #include "core/time.h"
@@ -740,6 +743,7 @@ static void emu_host_resized(void *userdata) {
 
 void emu_run_frame(struct emu *emu) {
   static const int64_t MACHINE_STEP = HZ_TO_NANO(1000);
+  static int skip_count = 0;
 
   /* unbind the video context, making it available for the video thread */
   if (emu->multi_threaded) {
@@ -758,23 +762,44 @@ void emu_run_frame(struct emu *emu) {
     mutex_unlock(emu->pending_mutex);
   }
 
-  /* render the latest frame */
+  /* auto frameskip: skip painting if we're behind, up to emu_frameskip_max
+     consecutive frames. always paint at least every (max+1) frames so the
+     screen doesn't freeze completely */
   int64_t now = time_nanoseconds();
+
+  int do_paint = 1;
+  if (emu_frameskip_max > 0) {
+    if (skip_count < emu_frameskip_max && emu->last_paint) {
+      /* if this frame took longer than 16ms we're running slow — skip */
+      float elapsed = (float)(now - emu->last_paint) / 1000000.0f;
+      if (elapsed > 16.7f) {
+        do_paint = 0;
+        skip_count++;
+      } else {
+        skip_count = 0;
+      }
+    } else {
+      skip_count = 0;
+    }
+  }
 
   if (emu->multi_threaded) {
     video_bind_context(emu->host, emu->r);
   }
 
   prof_update(now);
-  emu_paint(emu);
 
-  if (emu->last_paint) {
-    float frame_time_ms = (float)(now - emu->last_paint) / 1000000.0f;
-    int num_frame_times = array_size(emu->frame_times);
-    emu->frame_times[emu->frame % num_frame_times] = frame_time_ms;
+  if (do_paint) {
+    emu_paint(emu);
+
+    if (emu->last_paint) {
+      float frame_time_ms = (float)(now - emu->last_paint) / 1000000.0f;
+      int num_frame_times = array_size(emu->frame_times);
+      emu->frame_times[emu->frame % num_frame_times] = frame_time_ms;
+    }
+
+    emu->last_paint = now;
   }
-
-  emu->last_paint = now;
 }
 
 int emu_load_game(struct emu *emu, const char *path) {

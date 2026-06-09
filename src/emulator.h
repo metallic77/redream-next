@@ -4,6 +4,8 @@
 struct emu;
 struct host;
 
+extern int emu_frameskip_max;
+
 struct emu *emu_create(struct host *host);
 void emu_destroy(struct emu *emu);
 

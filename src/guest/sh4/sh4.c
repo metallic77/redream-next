@@ -117,6 +117,10 @@ static void sh4_invalid_instr(void *data) {
   LOG_FATAL("Unhandled invalid instruction at 0x%08x", sh4->ctx.pc);
 }
 
+int sh4_speed_percent = 100;
+/* 0=VGA, 2=RGB, 3=Composite (matches DC hardware register values) */
+int sh4_cable_type = 3;
+
 static void sh4_run(struct device *dev, int64_t ns) {
   PROF_ENTER("cpu", "sh4_run");
 
@@ -124,7 +128,8 @@ static void sh4_run(struct device *dev, int64_t ns) {
   struct sh4_context *ctx = &sh4->ctx;
   struct jit *jit = sh4->jit;
 
-  int cycles = (int)NANO_TO_CYCLES(ns, SH4_CLOCK_FREQ);
+  int64_t effective_freq = SH4_CLOCK_FREQ * sh4_speed_percent / 100;
+  int cycles = (int)NANO_TO_CYCLES(ns, effective_freq);
   cycles = MAX(cycles, 1);
 
   jit_run(sh4->jit, cycles);
@@ -315,7 +320,7 @@ REG_R32(sh4_cb, PDTRA) {
   }
 
   /* FIXME cable setting */
-  int cable_type = 3;
+  int cable_type = sh4_cable_type;
   v |= (cable_type << 8);
   return v;
 }
